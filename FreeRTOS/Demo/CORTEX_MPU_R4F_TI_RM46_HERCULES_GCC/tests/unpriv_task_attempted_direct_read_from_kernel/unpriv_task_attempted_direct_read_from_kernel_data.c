@@ -107,7 +107,7 @@ static void prvAttemptedDirectReadTask( void * pvParameters )
 }
 
 
-BaseType_t xCreateAttemptedDirectReadTask( void )
+BaseType_t vRunTest( void )
 {
     extern uint32_t __peripherals_start__[];
     extern uint32_t __peripherals_end__[];
@@ -137,5 +137,10 @@ BaseType_t xCreateAttemptedDirectReadTask( void )
                              {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
     };   
 
-    return xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL );
+    sci_print("Creating the unprivileged task which attempted to directly read from kernel data\r\n\r\n");
+    if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
+    {
+        sci_print("-------------------- Starting the scheduler. --------------------\r\n\r\n");
+        vTaskStartScheduler();
+    }
 }

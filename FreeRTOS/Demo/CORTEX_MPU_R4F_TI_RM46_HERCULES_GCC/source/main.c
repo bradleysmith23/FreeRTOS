@@ -103,38 +103,7 @@ int main( void )
     sci_print( "\r\n---------------------------- Create FreeRTOS Tasks"
                "----------------------------\r\n\r\n" );
 
-#if (mainDEMO_TYPE & ATTEMPTED_WRITE_TEST )
-    {
-        if ( pdPASS == xReturn )
-        {
-            sci_print( "Creating the unprivileged task which attempts to write directly to kernel data.\r\n");
-            xReturn = xCreateAttemptedDirectWriteTask();
-        }
-    }
-#endif /* ( mainDEMO_TYPE & ATTEMPTED_WRITE_TEST )*/
-
-#if ( mainDEMO_TYPE & ATTEMPTED_READ_TEST )
-    {
-        if ( pdPASS == xReturn )
-        {
-            sci_print( "Creating the unprivileged task which attempts to read directly from kernel data.\r\n");
-            xReturn = xCreateAttemptedDirectReadTask();
-        }
-    }
-#endif /* mainDEMO_TYPE & ATTEMPTED_READ_TEST */
-
-    if( pdPASS == xReturn )
-    {
-        sci_print( "\r\n--------------------------- Start of FreeRTOS Demos"
-                   "---------------------------\r\n\r\n" );
-        vTaskStartScheduler();
-    }
-    else
-    {
-        sci_print( "Failed to create the Demo Tasks\r\n" );
-        configASSERT( pdFAIL );
-    }
-
+    vRunTest();
     /* If all is well, the scheduler will now be running, and the following
      * line will never be reached. If the following line does execute, then
      * there was an error when creating the necessary FreeRTOS objects. */

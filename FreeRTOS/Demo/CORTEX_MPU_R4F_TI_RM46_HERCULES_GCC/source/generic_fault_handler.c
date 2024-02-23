@@ -8,7 +8,7 @@ void vTestFaultHandler( void )
      * Each test can choose not to include this file and define their
      * own fault handler if this one does not fit the needs of the test.
      */
-    sci_print("Test Passed!");
+    sci_print("Test Passed!\r\n\r\n");
 
     /* Loop forever */
     while(1)

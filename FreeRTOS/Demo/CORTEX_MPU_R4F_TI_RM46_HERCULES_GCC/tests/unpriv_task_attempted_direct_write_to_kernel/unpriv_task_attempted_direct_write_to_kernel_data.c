@@ -108,7 +108,7 @@ static void prvAttemptedDirectWriteTask( void * pvParameters )
 }
 
 
-BaseType_t xCreateAttemptedDirectWriteTask( void )
+BaseType_t vRunTest( void )
 {
     extern uint32_t __peripherals_start__[];
     extern uint32_t __peripherals_end__[];
@@ -138,5 +138,9 @@ BaseType_t xCreateAttemptedDirectWriteTask( void )
                            {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
     };   
 
-    return xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL );
+    if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
+    {
+        sci_print("-------------------- Starting the scheduler. --------------------");
+        vTaskStartScheduler();
+    }
 }
