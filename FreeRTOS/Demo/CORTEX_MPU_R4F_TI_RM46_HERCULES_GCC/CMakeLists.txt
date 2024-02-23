@@ -74,19 +74,6 @@ INCLUDE_DIRECTORIES(
     ${PORT_DIR}
 )
 
-# Source files used for the FreeRTOS Demos
-FILE(GLOB FREERTOS_DEMO_SOURCES
-    ${DEMO_DIR}/source/main.c
-    ${DEMO_DIR}/source/irq_demo.c
-    ${DEMO_DIR}/source/mpu_demo.c
-    ${DEMO_DIR}/source/notification_demo.c
-    ${DEMO_DIR}/source/queue_demo.c
-    ${DEMO_DIR}/source/reg_test.c
-    ${DEMO_DIR}/source/reg_test_GCC.S
-    ${DEMO_DIR}/source/unpriv_task_attempted_direct_write_to_kernel_data.c
-    ${DEMO_DIR}/source/unpriv_task_attempted_direct_read_from_kernel_data.c
-)
-
 # Source files used for the Board Support Package
 ADD_LIBRARY(TI_BOARD_SUPPORT_PACKAGE OBJECT
     ${BOARD_FILES_DIR}/source/adc.c
@@ -149,65 +136,7 @@ MESSAGE("Demo Sources: ${FREERTOS_DEMO_SOURCES}")
 MESSAGE("FreeRTOS Sources: ${FREERTOS_KERNEL_SOURCES}")
 MESSAGE("Port Sources: ${FREERTOS_PORT_SOURCES}")
 
-# Create Full Demo executable
-ADD_EXECUTABLE(RM46_FreeRTOS_Full.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-# Create Register Demo executable
-ADD_EXECUTABLE(RM46_FreeRTOS_Register_Demo.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-# Create Queue Demo executable
-ADD_EXECUTABLE(RM46_FreeRTOS_Queue_Demo.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-# Create MPU Demo executable
-ADD_EXECUTABLE(RM46_FreeRTOS_MPU_Demo.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-# Create IRQ Demo executable
-ADD_EXECUTABLE(RM46_FreeRTOS_IRQ_Demo.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-# Create Notification Demo executable
-ADD_EXECUTABLE(RM46_FreeRTOS_Notification_Demo.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-ADD_EXECUTABLE(RM46_Unpriv_Attempted_Direct_Write_Test.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-ADD_EXECUTABLE(RM46_Unpriv_Attempted_Direct_Read_Test.out
-    ${FREERTOS_DEMO_SOURCES}
-)
-
-# ADD_EXECUTABLE(RM46_Unpriv_Attempted_Read_From_Another_Task_Stack_Test.out
-#     ${FREERTOS_DEMO_SOURCES}
-# )
-
-# These options are explained in the demo_tasks.h file
-SET_TARGET_PROPERTIES(RM46_FreeRTOS_Full.out PROPERTIES                 COMPILE_DEFINITIONS "mainDEMO_TYPE=0xFF")
-SET_TARGET_PROPERTIES(RM46_FreeRTOS_Register_Demo.out PROPERTIES        COMPILE_DEFINITIONS "mainDEMO_TYPE=0x1")
-SET_TARGET_PROPERTIES(RM46_FreeRTOS_Queue_Demo.out PROPERTIES           COMPILE_DEFINITIONS "mainDEMO_TYPE=0x2")
-SET_TARGET_PROPERTIES(RM46_FreeRTOS_MPU_Demo.out PROPERTIES             COMPILE_DEFINITIONS "mainDEMO_TYPE=0x4")
-SET_TARGET_PROPERTIES(RM46_FreeRTOS_IRQ_Demo.out PROPERTIES             COMPILE_DEFINITIONS "mainDEMO_TYPE=0x8")
-SET_TARGET_PROPERTIES(RM46_FreeRTOS_Notification_Demo.out PROPERTIES    COMPILE_DEFINITIONS "mainDEMO_TYPE=0x10")
-SET_TARGET_PROPERTIES(RM46_Unpriv_Attempted_Direct_Write_Test.out PROPERTIES COMPILE_DEFINITIONS "mainDEMO_TYPE=0x20")
-SET_TARGET_PROPERTIES(RM46_Unpriv_Attempted_Direct_Read_Test.out PROPERTIES COMPILE_DEFINITIONS "mainDEMO_TYPE=0x40")
-# SET_TARGET_PROPERTIES(RM46_Unpriv_Attempted_Direct_Read_From_Another_Task_Stack_Test.out PROPERTIES COMPILE_DEFINITIONS "mainDEMO_TYPE=0x80")
-
-TARGET_LINK_LIBRARIES(RM46_FreeRTOS_Full.out                FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-TARGET_LINK_LIBRARIES(RM46_FreeRTOS_Register_Demo.out       FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-TARGET_LINK_LIBRARIES(RM46_FreeRTOS_Queue_Demo.out          FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-TARGET_LINK_LIBRARIES(RM46_FreeRTOS_MPU_Demo.out            FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-TARGET_LINK_LIBRARIES(RM46_FreeRTOS_IRQ_Demo.out            FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-TARGET_LINK_LIBRARIES(RM46_FreeRTOS_Notification_Demo.out   FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-TARGET_LINK_LIBRARIES(RM46_Unpriv_Attempted_Direct_Write_Test.out   FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-TARGET_LINK_LIBRARIES(RM46_Unpriv_Attempted_Direct_Read_Test.out   FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
-# TARGET_LINK_LIBRARIES(RM46_Unpriv_Attempted_Direct_Read_From_Another_Task_Stack_Test.out   FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
+#-------------------------------------------------------------------------------
+# Add system tests
+#-------------------------------------------------------------------------------
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)

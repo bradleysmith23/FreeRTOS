@@ -1,0 +1,3 @@
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_direct_read_from_kernel)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_direct_write_to_kernel)
+
