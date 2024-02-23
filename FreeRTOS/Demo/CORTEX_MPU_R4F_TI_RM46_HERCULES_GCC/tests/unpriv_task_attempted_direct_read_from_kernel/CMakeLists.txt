@@ -5,9 +5,9 @@ set(TEST_SOURCES
 )
 
 set(COMMON_TEST_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/../../source/test_utils.c
-    ${CMAKE_CURRENT_LIST_DIR}/../../source/main.c
-    ${CMAKE_CURRENT_LIST_DIR}/../../source/generic_fault_handler.c
+    ${CMAKE_CURRENT_LIST_DIR}/../../Common/test_utils.c
+    ${CMAKE_CURRENT_LIST_DIR}/../../Common/main.c
+    ${CMAKE_CURRENT_LIST_DIR}/../../Common/generic_fault_handler.c
     )
 
 ADD_EXECUTABLE(RM46_Unpriv_Attempted_Direct_Read_Test.out

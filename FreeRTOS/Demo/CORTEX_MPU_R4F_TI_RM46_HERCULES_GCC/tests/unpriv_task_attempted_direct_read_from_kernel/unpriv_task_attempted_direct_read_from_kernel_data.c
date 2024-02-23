@@ -137,7 +137,7 @@ BaseType_t vRunTest( void )
                              {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
     };   
 
-    sci_print("Creating the unprivileged task which attempted to directly read from kernel data\r\n\r\n");
+    sci_print("Creating the unprivileged task which attempts to directly read from kernel data\r\n\r\n");
     if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
     {
         sci_print("-------------------- Starting the scheduler. --------------------\r\n\r\n");
