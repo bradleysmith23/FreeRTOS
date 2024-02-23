@@ -88,18 +88,6 @@
 #include "portmacro.h"
 #include "mpu_wrappers.h"
 
-/** @brief Create unprivileged task that attempts to write directly to kernel data
- * @return pdPASS if task is created
- * pdFAIL if task is not created
-*/
-BaseType_t xCreateAttemptedDirectWriteTask( void );
-
-/** @brief Create unprivileged task that attempts to write directly to kernel data
- * @return pdPASS if task is created
- * pdFAIL if task is not created
-*/
-BaseType_t xCreateAttemptedDirectReadTask( void );
-
 
 /* Registers required to configure the Real Time Interrupt (RTI). */
 #define portRTI_GCTRL_REG        ( *( ( volatile uint32_t * ) 0xFFFFFC00UL ) )
