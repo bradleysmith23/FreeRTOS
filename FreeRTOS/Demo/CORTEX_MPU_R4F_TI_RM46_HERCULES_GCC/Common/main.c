@@ -100,8 +100,8 @@ int main( void )
     ulIdleTickHookCount = 0x0;
     prvSetupHardware();
 
-    sci_print( "\r\n---------------------------- Create FreeRTOS Tasks"
-               "----------------------------\r\n\r\n" );
+    sci_print( "\r\n--------------------------- Create FreeRTOS Tasks"
+               " ----------------------------\r\n\r\n" );
 
     vRunTest();
     /* If all is well, the scheduler will now be running, and the following

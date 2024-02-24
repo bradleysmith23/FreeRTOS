@@ -120,7 +120,8 @@ BaseType_t vRunTest( void )
     sci_print("Creating the unprivileged task which attempts to directly read from kernel data\r\n\r\n");
     if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
     {
-        sci_print("-------------------- Starting the scheduler. --------------------\r\n\r\n");
+        sci_print( "\r\n--------------------------- Starting the Scheduler"
+                   " ---------------------------\r\n\r\n" );
         vTaskStartScheduler();
     }
 }
