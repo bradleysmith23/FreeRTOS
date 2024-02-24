@@ -43,23 +43,11 @@
 #if( ( ( SHARED_MEMORY_SIZE % 2UL ) != 0UL ) || ( SHARED_MEMORY_SIZE < 32UL ) )
     #error SHARED_MEMORY_SIZE Must be a power of 2 that is larger than 32
 #endif /* ( ( SHARED_MEMORY_SIZE % 2UL ) != 0UL ) || ( SHARED_MEMORY_SIZE < 32UL ) */
-/**
- * @brief Memory region used to track Memory Fault intentionally caused by the
- * RO Access task.
- *
- * @note RO Access task sets ucROTaskFaultTracker[ 0 ] to 1 before accessing illegal
- * memory. Illegal memory access causes Memory Fault and the fault handler
- * checks ucROTaskFaultTracker[ 0 ] to see if this is an expected fault. We
- * recover gracefully from an expected fault by jumping to the next instruction.
- *
- */
-volatile uint8_t ucAttemptedReadTaskFaultTracker[SHARED_MEMORY_SIZE]
-    __attribute__( ( aligned( SHARED_MEMORY_SIZE ) ) ) = { 0 };
 
 /** @brief Privileged data that the created task does not have access to, but
  *  will attempt to write to it, intentionally causing a memory fault.
 */
-PRIVILEGED_DATA static uint32_t ulReadableByNonPrivileged = 0xFEEDU;
+PRIVILEGED_DATA static uint32_t ulUnreadableByNonPrivileged = 0xFEEDU;
 
 /** @brief Statically declared MPU aligned stack used by the Read Only task */
 static StackType_t xAttemptedDirectReadTaskStack[ configMINIMAL_STACK_SIZE ]
@@ -92,12 +80,9 @@ static void prvAttemptedDirectReadTask( void * pvParameters )
         /* Attempt to read to privileged data when task does not have access.
          * This should trigger a data abort. 
          */
-        ucAttemptedReadTaskFaultTracker[0] = 1U;
-        ucVal = ulReadableByNonPrivileged;
-        ucVal = ucAttemptedReadTaskFaultTracker[0];
-        configASSERT( ucVal == 0U );
+        ucVal = ulUnreadableByNonPrivileged;
 
-        sci_print("Test Complete! Entering an infinite loop.\r\n");
+        sci_print("Test Failed. Entering an infinite loop.\r\n");
         for(;;)
         {
             /* Test has completed, sit in an infinite loop. */
@@ -111,9 +96,6 @@ BaseType_t vRunTest( void )
 {
     extern uint32_t __peripherals_start__[];
     extern uint32_t __peripherals_end__[];
-
-    uint32_t ulWriteMemoryPermissions = portMPU_REGION_PRIV_RW_USER_RW_NOEXEC
-                                      | portMPU_REGION_NORMAL_OIWTNOWA_SHARED;
 
     uint32_t ulPeriphRegionStart = ( uint32_t ) __peripherals_start__;
     uint32_t ulPeriphRegionSize = ( uint32_t ) __peripherals_end__ - ulPeriphRegionStart;
@@ -129,10 +111,8 @@ BaseType_t vRunTest( void )
         .uxPriority     = ( ( configMAX_PRIORITIES - 1 ) ),
         .puxStackBuffer = xAttemptedDirectReadTaskStack,
         .pxTaskBuffer   = &xAttemptedDirectWriteTaskTCB,
-    /* This will give access to only the task's stack, the fault tracker, and peripherals for printing. */
-        .xRegions       = {{ ( void * ) ucAttemptedReadTaskFaultTracker,
-                                          SHARED_MEMORY_SIZE,
-                                          ulWriteMemoryPermissions },
+    /* This will give access to only the task's stack and peripherals for printing. */
+        .xRegions       = {
                             /* Necessary to write over UART */
                              {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
     };   

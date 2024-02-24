@@ -43,18 +43,6 @@
 #if( ( ( SHARED_MEMORY_SIZE % 2UL ) != 0UL ) || ( SHARED_MEMORY_SIZE < 32UL ) )
     #error SHARED_MEMORY_SIZE Must be a power of 2 that is larger than 32
 #endif /* ( ( SHARED_MEMORY_SIZE % 2UL ) != 0UL ) || ( SHARED_MEMORY_SIZE < 32UL ) */
-/**
- * @brief Memory region used to track Memory Fault intentionally caused by the
- * RO Access task.
- *
- * @note RO Access task sets ucROTaskFaultTracker[ 0 ] to 1 before accessing illegal
- * memory. Illegal memory access causes Memory Fault and the fault handler
- * checks ucROTaskFaultTracker[ 0 ] to see if this is an expected fault. We
- * recover gracefully from an expected fault by jumping to the next instruction.
- *
- */
-volatile uint8_t ucAttemptedWriteTaskFaultTracker[SHARED_MEMORY_SIZE]
-    __attribute__( ( aligned( SHARED_MEMORY_SIZE ) ) ) = { 0 };
 
 /** @brief Privileged data that the created task does not have access to, but
  *  will attempt to write to it, intentionally causing a memory fault.
@@ -81,7 +69,6 @@ static void prvAttemptedDirectWriteTask( void * pvParameters );
 
 static void prvAttemptedDirectWriteTask( void * pvParameters )
 {
-    volatile uint8_t ucVal = 0x0;
      /* Unused parameters. */
     ( void ) pvParameters;
 
@@ -92,12 +79,9 @@ static void prvAttemptedDirectWriteTask( void * pvParameters )
         /* Attempt to write to privileged data when task does not have access.
          * This should trigger a data abort. 
          */
-        ucAttemptedWriteTaskFaultTracker[0] = 1U;
         ulUnwritableByNonPrivileged = 0x0U;
-        ucVal = ucAttemptedWriteTaskFaultTracker[0];
-        configASSERT( ucVal == 0U );
 
-        sci_print("Test Complete! Entering an infinite loop.\r\n");
+        sci_print("Test Failed. Entering an infinite loop.\r\n");
         for(;;)
         {
             /* Test has completed, sit in an infinite loop. */
@@ -113,9 +97,6 @@ BaseType_t vRunTest( void )
     extern uint32_t __peripherals_start__[];
     extern uint32_t __peripherals_end__[];
 
-    uint32_t ulWriteMemoryPermissions = portMPU_REGION_PRIV_RW_USER_RW_NOEXEC
-                                      | portMPU_REGION_NORMAL_OIWTNOWA_SHARED;
-
     uint32_t ulPeriphRegionStart = ( uint32_t ) __peripherals_start__;
     uint32_t ulPeriphRegionSize = ( uint32_t ) __peripherals_end__ - ulPeriphRegionStart;
     uint32_t ulPeriphRegionAttr = portMPU_REGION_PRIV_RW_USER_RW_NOEXEC | portMPU_REGION_ENABLE;
@@ -130,10 +111,8 @@ BaseType_t vRunTest( void )
         .uxPriority     = ( ( configMAX_PRIORITIES - 1 ) ),
         .puxStackBuffer = xAttemptedDirectWriteTaskStack,
         .pxTaskBuffer   = &xAttemptedDirectWriteTaskTCB,
-    /* This will give access to only the task's stack and the fault tracker */
-        .xRegions       = {{ ( void * ) ucAttemptedWriteTaskFaultTracker,
-                                          SHARED_MEMORY_SIZE,
-                                          ulWriteMemoryPermissions },
+    /* This will give access to only the task's stack and peripherals for writing over UART*/
+        .xRegions       = {
                            /* Necessary to write over UART */
                            {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
     };   
@@ -141,7 +120,7 @@ BaseType_t vRunTest( void )
     sci_print("Creating the unprivileged task which attempts to directly write to kernel data\r\n\r\n");
     if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
     {
-        sci_print("-------------------- Starting the scheduler. --------------------");
+        sci_print("-------------------- Starting the scheduler. --------------------\r\n\r\n");
         vTaskStartScheduler();
     }
 }
