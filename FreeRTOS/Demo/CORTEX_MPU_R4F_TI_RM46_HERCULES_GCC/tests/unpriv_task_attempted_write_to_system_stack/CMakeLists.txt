@@ -1,4 +1,4 @@
-set(TEST_NAME unpriv_task_attempted_direct_write_to_kernel_data)
+set(TEST_NAME unpriv_task_attempted_direct_write_to_system_stack)
 
 set(TEST_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/${TEST_NAME}.c

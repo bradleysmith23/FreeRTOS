@@ -1,3 +1,5 @@
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_direct_read_from_kernel)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_direct_write_to_kernel)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_another_task_stack)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_another_task_stack)
 # To add more tests, add the test directory as a subdirectory here

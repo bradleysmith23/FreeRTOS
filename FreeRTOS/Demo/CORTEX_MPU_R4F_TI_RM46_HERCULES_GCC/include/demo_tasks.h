@@ -27,62 +27,6 @@
 #ifndef DEMO_TASKS_H
 #define DEMO_TASKS_H
 
-/* ------------------------------ Demo Option ------------------------------ */
-
-/** @brief Create Tasks that are written in assembly to test context swaps */
-#define REGISTER_DEMO     0x1
-
-/** @brief Demo that uses timers, timer callbacks, and Queues */
-#define QUEUE_DEMO        0x2
-
-/** @brief Demo that causes data aborts and clears them to show MPU usage */
-#define MPU_DEMO          0x4
-
-/** @brief Demo that causes and unwinds a Nested IRQ */
-#define IRQ_DEMO          0x8
-
-/** @brief Demo that uses the Task Notification APIs */
-#define NOTIFICATION_DEMO 0x10
-
-/** @brief Tests that an unprivileged task cannot directly write to kernel data */
-#define ATTEMPTED_WRITE_TEST 0x20
-
-/** @brief Tests that an unprivileged task cannot directly write to kernel data */
-#define ATTEMPTED_READ_TEST  0x40
-
-/** @brief Tests that an unprivileged task cannot directly write to kernel data */
-#define ATTEMPTED_TASK_STACK_READ_TEST  0x80
-
-/** @brief Build Register, Queue, MPU, IRQ, and Notification demos */
-#define FULL_DEMO         ( REGISTER_DEMO | QUEUE_DEMO | MPU_DEMO | IRQ_DEMO | NOTIFICATION_DEMO | ATTEMPTED_WRITE_TEST | ATTEMPTED_READ_TEST | ATTEMPTED_TASK_STACK_READ_TEST )
-
-/** @brief Bitfield used to select the Demo Tasks to build and run
- *
- * @note This project contains multiple demo and test tasks. A bitfield is used
- * to select which demos and tests are built and run as part of the executable.
- * More information about what these demos and tests do can be found in their
- * corresponding files.
- *
- * Bit 1 Set: Include the Register Test Tasks
- *
- * Bit 2 Set: Include the Queue Send and Receive Test Tasks
- *
- * Bit 3 Set: Include the MPU Data Abort Test Tasks
- *
- * Bit 4 Set: Include the Nested IRQ Test Tasks
- *
- * Bit 5 Set: Include the Notification Test Tasks
- * 
- * Bit 6 Set: Include the Unprivileged Task Attempted Direct Write To Kernel Data Test
- *
- * Bit 7 Set: Include the Unprivileged Task Attempted Direct Read From Kernel Data Test.
- * 
- * Bit 8 Set: Include the Unprivileged Task Attempted Write to Another Task's Stack Test
- */
-#ifndef mainDEMO_TYPE
-    #define mainDEMO_TYPE ( FULL_DEMO )
-#endif /* mainDEMO_TYPE */
-
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "portmacro.h"
