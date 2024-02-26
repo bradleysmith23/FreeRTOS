@@ -154,7 +154,7 @@ BaseType_t vRunTest( void )
         .puxStackBuffer = xTaskTwoStack,
         .pxTaskBuffer   = &xTaskTwoTCB,
     /* This will give access to only the task's stack */
-        .xRegions       = NULL,
+        .xRegions       = {},
     }; 
 
     sci_print("Creating two tasks, one of which attempts to read from the others stack\r\n\r\n");

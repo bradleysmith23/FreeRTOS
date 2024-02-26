@@ -106,7 +106,9 @@ int main( void )
     sci_print( "\r\n--------------------------- Create FreeRTOS Tasks"
                " ----------------------------\r\n\r\n" );
 
+    /* Create tasks and start the scheduler */
     vRunTest();
+    
     /* If all is well, the scheduler will now be running, and the following
      * line will never be reached. If the following line does execute, then
      * there was an error when creating the necessary FreeRTOS objects. */

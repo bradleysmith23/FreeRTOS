@@ -4,4 +4,10 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_anothe
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_another_task_stack)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_system_stack)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_system_stack)
+# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_task_system_call_stack)
+# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_task_system_call_stack)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_another_tasks_tcb)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_another_tasks_tcb)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_special_registers)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_special_registers)
 # To add more tests, add the test directory as a subdirectory here

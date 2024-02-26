@@ -44,27 +44,13 @@
     #error SHARED_MEMORY_SIZE Must be a power of 2 that is larger than 32
 #endif /* ( ( SHARED_MEMORY_SIZE % 2UL ) != 0UL ) || ( SHARED_MEMORY_SIZE < 32UL ) */
 
-/** @brief Privileged data that the created task does not have access to, but
- *  will attempt to write to it, intentionally causing a memory fault.
-*/
-PRIVILEGED_DATA static uint32_t ulUnwritableByNonPrivileged = 0xFEEDU;
-
-/** @brief Statically declared MPU aligned stack used by the Attempted Write task */
+/** @brief Statically declared MPU aligned stack used by the Read Only task */
 static StackType_t xAttemptedDirectWriteTaskStack[ configMINIMAL_STACK_SIZE ]
     __attribute__( ( aligned( configMINIMAL_STACK_SIZE * 0x4U ) ) );
 
-/** @brief Statically declared MPU aligned stack used by task two */
-static StackType_t xTaskTwoStack[ configMINIMAL_STACK_SIZE ]
-    __attribute__( ( aligned( configMINIMAL_STACK_SIZE * 0x4U ) ) );
 
-
-
-
-/** @brief Statically declared TCB Used by the Attempted Write Task */
+/** @brief Statically declared TCB Used by the Idle Task */
 PRIVILEGED_DATA static StaticTask_t xAttemptedDirectWriteTaskTCB;
-
-/** @brief Statically declared TCB Used by the Task TWo */
-PRIVILEGED_DATA static StaticTask_t xTaskTwoTCB;
 
 
 /* ----------------------- Task Function Declaration ----------------------- */
@@ -74,7 +60,6 @@ PRIVILEGED_DATA static StaticTask_t xTaskTwoTCB;
  * @param pvParameters[in] Parameters as passed during task creation.
  */
 static void prvAttemptedDirectWriteTask( void * pvParameters );
-static void prvTaskTwo( void * pvParameters );
 
 
 static void prvAttemptedDirectWriteTask( void * pvParameters )
@@ -86,13 +71,12 @@ static void prvAttemptedDirectWriteTask( void * pvParameters )
      * which it does not have permissions to do. */
     for( ;; )
     {
-        /* Attempt to write to another task's stack.
-         * This should trigger a data abort.
+        /* Attempt to write to privileged data when task does not have access.
+         * This should trigger a data abort. 
          */
-        sci_print( "Attempting to write to another task's stack.\r\n\r\n");
-        xTaskTwoStack[1] = 0x1U;
+        sci_print("Attempting to write to the CPSR register.\r\n\r\n");
+        __asm__("cps  0x1FU");
 
-        /* Should not get here as we triggered a data abort. */
         sci_print("Test Failed. Entering an infinite loop.\r\n");
         for(;;)
         {
@@ -102,28 +86,12 @@ static void prvAttemptedDirectWriteTask( void * pvParameters )
 
 }
 
-static void prvTaskTwo( void * pvParameters )
-{
-    /* Unused parameters */
-    ( void ) pvParameters;
 
-    for(;;)
-    {
-        /*
-         * Do nothing, this task exists so the other task can attempt 
-         * to write to its stack.
-         */
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-}
-
-
-BaseType_t vRunTest( void )
+void vRunTest( void )
 {
     extern uint32_t __peripherals_start__[];
     extern uint32_t __peripherals_end__[];
 
-    BaseType_t pdStatus;
     uint32_t ulPeriphRegionStart = ( uint32_t ) __peripherals_start__;
     uint32_t ulPeriphRegionSize = ( uint32_t ) __peripherals_end__ - ulPeriphRegionStart;
     uint32_t ulPeriphRegionAttr = portMPU_REGION_PRIV_RW_USER_RW_NOEXEC | portMPU_REGION_ENABLE;
@@ -142,39 +110,13 @@ BaseType_t vRunTest( void )
         .xRegions       = {
                            /* Necessary to write over UART */
                            {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
-    };  
+    };   
 
-    TaskParameters_t xTaskTwoParameters =
-    {
-        .pvTaskCode     = prvTaskTwo,
-        .pcName         = "NonPrivileged",
-        .usStackDepth   = configMINIMAL_STACK_SIZE,
-        .pvParameters   = NULL,
-        .uxPriority     = ( ( configMAX_PRIORITIES - 1 ) ),
-        .puxStackBuffer = xTaskTwoStack,
-        .pxTaskBuffer   = &xTaskTwoTCB,
-    /* This will give access to only the task's stack */
-        .xRegions       = {},
-    }; 
-
-    sci_print("Creating two tasks, one of which attempts to write to the others stack\r\n\r\n");
-
-    pdStatus = xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL );
-    pdStatus = xTaskCreateRestrictedStatic( &( xTaskTwoParameters ), NULL );
-
-    if ( pdStatus == pdPASS )
+    sci_print("Creating the unprivileged task which attempts to directly write to the CSPR register.r\n\r\n");
+    if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
     {
         sci_print( "\r\n--------------------------- Starting the Scheduler"
                    " ---------------------------\r\n\r\n" );
         vTaskStartScheduler();
-    }
-    else
-    {
-        sci_print( "\r\n--------------------------- Failed to Start Scheduler"
-                   " ---------------------------\r\n\r\n" );
-        while(1)
-        {
-            /* Scheduler failed to start, sit here forever. */
-        }
     }
 }

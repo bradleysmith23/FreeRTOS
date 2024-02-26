@@ -50,7 +50,7 @@
 PRIVILEGED_DATA static uint32_t ulUnwritableByNonPrivileged = 0xFEEDU;
 
 /** @brief Statically declared MPU aligned stack used by the Attempted Write task */
-static StackType_t xAttemptedDirectWriteTaskStack[ configMINIMAL_STACK_SIZE ]
+static StackType_t xAttemptedReadTaskStack[ configMINIMAL_STACK_SIZE ]
     __attribute__( ( aligned( configMINIMAL_STACK_SIZE * 0x4U ) ) );
 
 /** @brief Statically declared MPU aligned stack used by task two */
@@ -61,7 +61,7 @@ static StackType_t xTaskTwoStack[ configMINIMAL_STACK_SIZE ]
 
 
 /** @brief Statically declared TCB Used by the Attempted Write Task */
-PRIVILEGED_DATA static StaticTask_t xAttemptedDirectWriteTaskTCB;
+PRIVILEGED_DATA static StaticTask_t xAttemptedReadTaskTCB;
 
 /** @brief Statically declared TCB Used by the Task TWo */
 PRIVILEGED_DATA static StaticTask_t xTaskTwoTCB;
@@ -73,11 +73,11 @@ PRIVILEGED_DATA static StaticTask_t xTaskTwoTCB;
  *
  * @param pvParameters[in] Parameters as passed during task creation.
  */
-static void prvAttemptedDirectWriteTask( void * pvParameters );
+static void prvAttemptedReadTask( void * pvParameters );
 static void prvTaskTwo( void * pvParameters );
 
 
-static void prvAttemptedDirectWriteTask( void * pvParameters )
+static void prvAttemptedReadTask( void * pvParameters )
 {
      /* Unused parameters. */
     ( void ) pvParameters;
@@ -86,11 +86,15 @@ static void prvAttemptedDirectWriteTask( void * pvParameters )
      * which it does not have permissions to do. */
     for( ;; )
     {
-        /* Attempt to write to another task's stack.
+        /* Attempt to write to another task's TCB.
          * This should trigger a data abort.
          */
-        sci_print( "Attempting to write to another task's stack.\r\n\r\n");
-        xTaskTwoStack[1] = 0x1U;
+        /* 
+         * Odd - print statement does not execute when line below it is not 
+         * commented out
+         */
+        sci_print("Attempting to read from Task Two's TCB.\r\n\r\n");
+        StaticTask_t val = xTaskTwoTCB;
 
         /* Should not get here as we triggered a data abort. */
         sci_print("Test Failed. Entering an infinite loop.\r\n");
@@ -131,13 +135,13 @@ BaseType_t vRunTest( void )
      /* Initialize task parameters for non-privileged task creation. */
     TaskParameters_t xNonPrivilegedTaskParameters =
     {
-        .pvTaskCode     = prvAttemptedDirectWriteTask,
+        .pvTaskCode     = prvAttemptedReadTask,
         .pcName         = "NonPrivileged",
         .usStackDepth   = configMINIMAL_STACK_SIZE,
         .pvParameters   = NULL,
         .uxPriority     = ( ( configMAX_PRIORITIES - 1 ) ),
-        .puxStackBuffer = xAttemptedDirectWriteTaskStack,
-        .pxTaskBuffer   = &xAttemptedDirectWriteTaskTCB,
+        .puxStackBuffer = xAttemptedReadTaskStack,
+        .pxTaskBuffer   = &xAttemptedReadTaskTCB,
     /* This will give access to only the task's stack and peripherals for writing over UART*/
         .xRegions       = {
                            /* Necessary to write over UART */
@@ -157,7 +161,7 @@ BaseType_t vRunTest( void )
         .xRegions       = {},
     }; 
 
-    sci_print("Creating two tasks, one of which attempts to write to the others stack\r\n\r\n");
+    sci_print("Creating two tasks, one of which attempts to read from the others TCB\r\n\r\n");
 
     pdStatus = xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL );
     pdStatus = xTaskCreateRestrictedStatic( &( xTaskTwoParameters ), NULL );

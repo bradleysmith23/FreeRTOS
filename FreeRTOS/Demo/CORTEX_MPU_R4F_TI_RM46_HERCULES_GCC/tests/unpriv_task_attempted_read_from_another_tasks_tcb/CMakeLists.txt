@@ -1,0 +1,19 @@
+set(TEST_NAME unpriv_task_attempted_read_from_another_tasks_tcb)
+
+set(TEST_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/${TEST_NAME}.c
+)
+
+set(COMMON_TEST_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/../../Common/test_utils.c
+    ${CMAKE_CURRENT_LIST_DIR}/../../Common/main.c
+    ${CMAKE_CURRENT_LIST_DIR}/../../Common/generic_fault_handler.c
+    )
+
+ADD_EXECUTABLE(${TEST_NAME}.out
+    ${FREERTOS_DEMO_SOURCES}
+    ${TEST_SOURCES}
+    ${COMMON_TEST_SOURCES}
+)
+
+TARGET_LINK_LIBRARIES(${TEST_NAME}.out   FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )
