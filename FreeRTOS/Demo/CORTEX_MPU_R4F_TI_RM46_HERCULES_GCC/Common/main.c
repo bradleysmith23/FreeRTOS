@@ -92,6 +92,9 @@ PRIVILEGED_DATA static volatile TickType_t ulIdleTickHookCount = 0x0;
 
 extern PRIVILEGED_DATA volatile uint32_t ulPortYieldRequired;
 
+/** @brief Variable declared in main for attempted read/write from system stack.*/
+uint32_t systemStackData = 0xFEEDU;
+
 /* ------------------------------------------------------------------------- */
 
 int main( void )

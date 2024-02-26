@@ -1,4 +1,4 @@
-set(TEST_NAME unpriv_task_attempted_direct_write_to_system_stack)
+set(TEST_NAME unpriv_task_attempted_write_to_system_stack)
 
 set(TEST_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/${TEST_NAME}.c
@@ -15,9 +15,5 @@ ADD_EXECUTABLE(${TEST_NAME}.out
     ${TEST_SOURCES}
     ${COMMON_TEST_SOURCES}
 )
-
-
-SET_TARGET_PROPERTIES(${TEST_NAME}.out PROPERTIES COMPILE_DEFINITIONS "mainDEMO_TYPE=0x20")
-
 
 TARGET_LINK_LIBRARIES(${TEST_NAME}.out   FREERTOS_PORT FREERTOS_KERNEL TI_BOARD_SUPPORT_PACKAGE )

@@ -1,4 +1,4 @@
-set(TEST_NAME unpriv_task_attempted_write_to_another_task_stack)
+set(TEST_NAME unpriv_task_attempted_write_to_task_system_call_stack)
 
 set(TEST_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/${TEST_NAME}.c

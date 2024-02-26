@@ -57,7 +57,7 @@ PRIVILEGED_DATA static StaticTask_t xAttemptedReadTaskTCB;
 
 /* ----------------------- Task Function Declaration ----------------------- */
 
-/** @brief Task function used by the task that attempts to directly write to kernel data.
+/** @brief Task function used by the task that attempts to directly read from the system stack.
  *
  * @param pvParameters[in] Parameters as passed during task creation.
  */
@@ -67,6 +67,7 @@ static void prvAttemptedReadTask( void * pvParameters );
 static void prvAttemptedReadTask( void * pvParameters )
 {
     volatile uint32_t ulVal = 0x0;
+    extern systemStackData;
      /* Unused parameters. */
     ( void ) pvParameters;
 
@@ -77,7 +78,7 @@ static void prvAttemptedReadTask( void * pvParameters )
         /* Attempt to read from the system stack.
          * This should trigger a data abort. 
          */
-        ulVal = 2;
+        ulVal = systemStackData;
 
         sci_print("Test Failed. Entering an infinite loop.\r\n");
         for(;;)

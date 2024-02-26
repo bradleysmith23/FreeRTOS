@@ -66,18 +66,18 @@ static void prvAttemptedWriteTask( void * pvParameters );
 
 static void prvAttemptedWriteTask( void * pvParameters )
 {
-    volatile uint32_t ulVal = 0x0;
+    extern uint32_t systemStackData;
      /* Unused parameters. */
     ( void ) pvParameters;
 
-    /* This task attempts to read from the system stack, 
+    /* This task attempts to write to the system stack, 
      * which it does not have permissions to do. */
     for( ;; )
     {
-        /* Attempt to read from the system stack.
+        /* Attempt to write to the system stack.
          * This should trigger a data abort. 
          */
-        ulVal = 2;
+        systemStackData = 0x0U;
 
         sci_print("Test Failed. Entering an infinite loop.\r\n");
         for(;;)
@@ -114,7 +114,7 @@ BaseType_t vRunTest( void )
                              {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
     };   
 
-    sci_print("Creating the unprivileged task which attempts to directly read from the system stack.\r\n\r\n");
+    sci_print("Creating the unprivileged task which attempts to directly write to the system stack.\r\n\r\n");
 
     if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
     {
