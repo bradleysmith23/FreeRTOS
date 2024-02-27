@@ -75,8 +75,10 @@ static void prvAttemptedDirectWriteTask( void * pvParameters )
          * This should trigger a data abort. 
          */
         sci_print("Attempting to write to the CPSR register.\r\n\r\n");
-        __asm__("cps  0x1FU");
+        unsigned * foo __asm__ ("cpsr");
+        *foo = 0x1FU;
 
+        /* Should not get here as the line above should trigger a data abort */
         sci_print("Test Failed. Entering an infinite loop.\r\n");
         for(;;)
         {

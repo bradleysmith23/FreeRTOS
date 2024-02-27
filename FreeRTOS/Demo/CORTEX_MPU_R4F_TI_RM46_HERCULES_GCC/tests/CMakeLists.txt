@@ -10,4 +10,5 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_anoth
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_another_tasks_tcb)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_read_from_special_registers)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_write_to_special_registers)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/unpriv_task_attempted_call_to_vMPUDisable)
 # To add more tests, add the test directory as a subdirectory here

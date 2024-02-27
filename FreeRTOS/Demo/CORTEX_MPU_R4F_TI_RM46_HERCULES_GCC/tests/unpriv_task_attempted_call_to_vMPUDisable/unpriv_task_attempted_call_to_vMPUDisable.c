@@ -36,7 +36,6 @@
 
 /* Demo includes */
 #include "demo_tasks.h"
-#include <stdio.h>
 
 /** @brief Size of the smallest valid MPU region, 32 bytes. */
 #define SHARED_MEMORY_SIZE 0x20UL
@@ -45,13 +44,20 @@
     #error SHARED_MEMORY_SIZE Must be a power of 2 that is larger than 32
 #endif /* ( ( SHARED_MEMORY_SIZE % 2UL ) != 0UL ) || ( SHARED_MEMORY_SIZE < 32UL ) */
 
+/** @brief Privileged data that the created task does not have access to, but
+ *  will attempt to write to it, intentionally causing a memory fault.
+*/
+PRIVILEGED_DATA static uint32_t ulUnwritableByNonPrivileged = 0xFEEDU;
+
 /** @brief Statically declared MPU aligned stack used by the Read Only task */
-static StackType_t xAttemptedDirectReadTaskStack[ configMINIMAL_STACK_SIZE ]
+static StackType_t xAttemptedDisableMPUTaskStack[ configMINIMAL_STACK_SIZE ]
     __attribute__( ( aligned( configMINIMAL_STACK_SIZE * 0x4U ) ) );
 
 
 /** @brief Statically declared TCB Used by the Idle Task */
-PRIVILEGED_DATA static StaticTask_t xAttemptedDirectWriteTaskTCB;
+PRIVILEGED_DATA static StaticTask_t xAttemptedDisableMPUTaskTCB;
+
+void vTaskAttemptMPUWrite( void ) __attribute__ (( naked ));
 
 
 /* ----------------------- Task Function Declaration ----------------------- */
@@ -60,12 +66,11 @@ PRIVILEGED_DATA static StaticTask_t xAttemptedDirectWriteTaskTCB;
  *
  * @param pvParameters[in] Parameters as passed during task creation.
  */
-static void prvAttemptedDirectReadTask( void * pvParameters );
+static void prvAttemptedDisableMPUTask( void * pvParameters );
 
 
-static void prvAttemptedDirectReadTask( void * pvParameters )
+static void prvAttemptedDisableMPUTask( void * pvParameters )
 {
-    char buffer[50];
      /* Unused parameters. */
     ( void ) pvParameters;
 
@@ -73,15 +78,11 @@ static void prvAttemptedDirectReadTask( void * pvParameters )
      * which it does not have permissions to do. */
     for( ;; )
     {
-        /* Attempt to read from the CPU mode register
+        /* Attempt to write to privileged data when task does not have access.
          * This should trigger a data abort. 
          */
-        /* Initialize local variable that points to cpsr register */
-        unsigned * foo __asm__ ("cpsr");
-        sci_print("Attempting to read from the cpsr register.\r\n\r\n");
-        /* Test passes when reading value with sprintf() into a buffer, 
-           but fails when doing - unsigned regVal = *foo; */
-        sprintf(buffer, "%u", *foo);
+        sci_print("Attempting to disable the MPU with an unprivileged task.");
+        vTaskAttemptMPUWrite();
 
         sci_print("Test Failed. Entering an infinite loop.\r\n");
         for(;;)
@@ -92,8 +93,24 @@ static void prvAttemptedDirectReadTask( void * pvParameters )
 
 }
 
+void vTaskAttemptMPUWrite( void )
+{
+    __asm volatile
+    (
+        " PUSH    { R0 }                    \n"
+        " MRC     p15, #0, R0, c1, c0, #0   \n" /* R0 = System Control Register (SCTLR). */
+        " BIC     R0,  R0, #1               \n" /* R0 = R0 & ~0x1. Clear the M bit in SCTLR. */
+        " DSB                               \n" /* Wait for all pending data accesses to complete. */
+        " MCR     p15, #0, R0, c1, c0, #0   \n" /* SCTLR = R0. */
+        /* Flush the pipeline and prefetch buffer(s) in the processor to ensure that
+         *  all following instructions are fetched from cache or memory. */
+        " ISB                               \n"
+        " POP     { R0 }                    \n"
+        " BX      LR                        \n"
+    );
+}
 
-void vRunTest( void )
+BaseType_t vRunTest( void )
 {
     extern uint32_t __peripherals_start__[];
     extern uint32_t __peripherals_end__[];
@@ -105,20 +122,20 @@ void vRunTest( void )
      /* Initialize task parameters for non-privileged task creation. */
     TaskParameters_t xNonPrivilegedTaskParameters =
     {
-        .pvTaskCode     = prvAttemptedDirectReadTask,
-        .pcName         = "NonPrivilegedead",
+        .pvTaskCode     = prvAttemptedDisableMPUTask,
+        .pcName         = "NonPrivileged",
         .usStackDepth   = configMINIMAL_STACK_SIZE,
         .pvParameters   = NULL,
         .uxPriority     = ( ( configMAX_PRIORITIES - 1 ) ),
-        .puxStackBuffer = xAttemptedDirectReadTaskStack,
-        .pxTaskBuffer   = &xAttemptedDirectWriteTaskTCB,
-    /* This will give access to only the task's stack and peripherals for printing. */
+        .puxStackBuffer = xAttemptedDisableMPUTaskStack,
+        .pxTaskBuffer   = &xAttemptedDisableMPUTaskTCB,
+    /* This will give access to only the task's stack and peripherals for writing over UART*/
         .xRegions       = {
-                            /* Necessary to write over UART */
-                             {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
+                           /* Necessary to write over UART */
+                           {( void * ) ulPeriphRegionStart, ulPeriphRegionSize, ulPeriphRegionAttr },}
     };   
 
-    sci_print("Creating the unprivileged task which attempts to directly read from the cspr register.\r\n\r\n");
+    sci_print("Creating the unprivileged task which attempts to directly write to kernel data\r\n\r\n");
     if ( xTaskCreateRestrictedStatic( &( xNonPrivilegedTaskParameters ), NULL ) == pdPASS )
     {
         sci_print( "\r\n--------------------------- Starting the Scheduler"
