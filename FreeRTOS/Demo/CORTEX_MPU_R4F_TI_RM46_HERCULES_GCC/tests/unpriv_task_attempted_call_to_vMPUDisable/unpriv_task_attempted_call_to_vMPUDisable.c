@@ -44,11 +44,6 @@
     #error SHARED_MEMORY_SIZE Must be a power of 2 that is larger than 32
 #endif /* ( ( SHARED_MEMORY_SIZE % 2UL ) != 0UL ) || ( SHARED_MEMORY_SIZE < 32UL ) */
 
-/** @brief Privileged data that the created task does not have access to, but
- *  will attempt to write to it, intentionally causing a memory fault.
-*/
-PRIVILEGED_DATA static uint32_t ulUnwritableByNonPrivileged = 0xFEEDU;
-
 /** @brief Statically declared MPU aligned stack used by the Read Only task */
 static StackType_t xAttemptedDisableMPUTaskStack[ configMINIMAL_STACK_SIZE ]
     __attribute__( ( aligned( configMINIMAL_STACK_SIZE * 0x4U ) ) );
@@ -57,7 +52,7 @@ static StackType_t xAttemptedDisableMPUTaskStack[ configMINIMAL_STACK_SIZE ]
 /** @brief Statically declared TCB Used by the Idle Task */
 PRIVILEGED_DATA static StaticTask_t xAttemptedDisableMPUTaskTCB;
 
-void vTaskAttemptMPUWrite( void ) __attribute__ (( naked ));
+static void vTaskAttemptMPUWrite( void ) __attribute__ (( naked ));
 
 
 /* ----------------------- Task Function Declaration ----------------------- */
@@ -82,6 +77,10 @@ static void prvAttemptedDisableMPUTask( void * pvParameters )
          * This should trigger a data abort. 
          */
         sci_print("Attempting to disable the MPU with an unprivileged task.");
+        /* 
+         * vMPUDisable is a privileged function, so copied the code into 
+         * into a function that is able to be called by the task.
+         */
         vTaskAttemptMPUWrite();
 
         sci_print("Test Failed. Entering an infinite loop.\r\n");
@@ -93,7 +92,7 @@ static void prvAttemptedDisableMPUTask( void * pvParameters )
 
 }
 
-void vTaskAttemptMPUWrite( void )
+static void vTaskAttemptMPUWrite( void )
 {
     __asm volatile
     (
