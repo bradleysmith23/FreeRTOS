@@ -36,7 +36,7 @@ void vTestFaultHandler( void )
      * and check that the most recent step written to the buffer is 
      * what we expect it to be.
      * Each test can choose not to include this file and define their
-     * own fault handler if this one does not fit the needs of the test.
+     * own vTestFaultHandler() if this one does not fit the needs of the test.
      */
     sci_print("Test Passed!\r\n\r\n");
 
