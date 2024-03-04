@@ -82,7 +82,7 @@ static void prvAttemptedDirectWriteTask( void * pvParameters )
      /* Unused parameters. */
     ( void ) pvParameters;
 
-    /* This task attempts to write directly to kernel data, 
+    /* This task attempts to write directly to another task's stack, 
      * which it does not have permissions to do. */
     for( ;; )
     {

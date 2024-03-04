@@ -86,7 +86,7 @@ static void prvAttemptedReadTask( void * pvParameters )
      * which it does not have permissions to do. */
     for( ;; )
     {
-        /* Attempt to write to another task's stack.
+        /* Attempt to read from another task's stack.
          * This should trigger a data abort.
          */
         sci_print("Attempting to read from Task Two's stack.\r\n\r\n");

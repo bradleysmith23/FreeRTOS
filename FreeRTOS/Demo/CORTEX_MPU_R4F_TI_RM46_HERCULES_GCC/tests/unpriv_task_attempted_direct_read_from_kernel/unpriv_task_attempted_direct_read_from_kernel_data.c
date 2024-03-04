@@ -73,7 +73,7 @@ static void prvAttemptedDirectReadTask( void * pvParameters )
      /* Unused parameters. */
     ( void ) pvParameters;
 
-    /* This task attempts to write directly to kernel data, 
+    /* This task attempts to read directly from kernel data, 
      * which it does not have permissions to do. */
     for( ;; )
     {

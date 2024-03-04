@@ -94,7 +94,7 @@ static void prvAttemptedReadTask( void * pvParameters )
          * commented out
          */
         sci_print("Attempting to read from Task Two's TCB.\r\n\r\n");
-        StaticTask_t val = xTaskTwoTCB;
+        StaticTask_t TCBval = xTaskTwoTCB;
 
         /* Should not get here as we triggered a data abort. */
         sci_print("Test Failed. Entering an infinite loop.\r\n");

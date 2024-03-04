@@ -69,12 +69,11 @@ static void prvAttemptedDisableMPUTask( void * pvParameters )
      /* Unused parameters. */
     ( void ) pvParameters;
 
-    /* This task attempts to write directly to kernel data, 
+    /* This task attempts to disable the MPU, 
      * which it does not have permissions to do. */
     for( ;; )
     {
-        /* Attempt to write to privileged data when task does not have access.
-         * This should trigger a data abort. 
+        /* Attempt to disable the MPU.
          */
         sci_print("Attempting to disable the MPU with an unprivileged task.");
         /* 
